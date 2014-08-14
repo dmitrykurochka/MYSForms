@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.social_media_url   = "http://twitter.com/atomkirk"
   s.platform     = :ios, "7.0"
   s.source       =  {
-                      :git => "https://github.com/mysterioustrousers/MYSForms.git",
+                      :git => "https://github.com/dmitrykurochka/MYSForms.git",
                       :tag => "#{s.version}",
                       :submodules => true
                     }
