@@ -44,7 +44,20 @@
 /**
  Called when the collection view is about to remove (for reuse) an element and the element's cell.
  */
+
+/**Called when the keyboard will shown
+ **/
+- (void)formViewControllerWillShowKeyboard:(NSNotification *)note;
+
+/**Called when the keyboard will hide
+ **/
+- (void)formViewControllerWillHideKeyboard:(NSNotification *)note;
+
+/**
+ Called when the collection view is about to remove (for reuse) an element and the element's cell.
+ */
 - (void)formViewController:(MYSFormViewController *)controller willRemoveElement:(id)element cell:(id)cell;
+
 
 @end
 

@@ -23,9 +23,9 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
 
 
 @interface MYSFormViewController () <UICollectionViewDelegateFlowLayout,
-                                     UITextFieldDelegate,
-                                     MYSFormElementDataSource,
-                                     MYSFormElementDelegate>
+UITextFieldDelegate,
+MYSFormElementDataSource,
+MYSFormElementDelegate>
 @property (nonatomic, strong) NSMutableArray      *elements;
 @property (nonatomic, strong) NSMutableDictionary *cachedCellSizes;
 @property (nonatomic, assign) NSUInteger          outstandingValidationErrorCount;
@@ -70,13 +70,13 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+    
     self.collectionView.backgroundColor      = [UIColor whiteColor];
     self.view.backgroundColor                = [UIColor whiteColor];
     self.collectionView.alwaysBounceVertical = YES;
-
+    
     [self configureForm];
-
+    
     [self registerElementCellsForReuse];
     [self setupKeyboardNotifications];
 }
@@ -134,14 +134,14 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
     for (MYSFormElement *element in self.elements) {
         [self registerCellForClass:[element cellClass]];
     }
-
+    
     // register metadata cells
     [self registerCellForClass:[MYSFormMessageChildCell class]];
     [self registerCellForClass:[MYSFormLoadingChildCell class]];
-
+    
     // register view child cell
     [self.collectionView registerClass:[MYSFormViewChildCell class] forCellWithReuseIdentifier:NSStringFromClass([MYSFormViewChildCell class])];
-
+    
     // register an invisble footer cell
     [self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"InvisibleCell"];
 }
@@ -154,13 +154,13 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
 - (void)addFormElement:(MYSFormElement *)element atIndex:(NSInteger)index
 {
     if (![element canAddElement]) return;
-
-
+    
+    
     element.dataSource  = self;
     element.delegate    = self;
-
+    
     [self.elements insertObject:element atIndex:index];
-
+    
     if ([self elementHasValidKeyPath:element]) {
         [self addObserver:self.model
                forKeyPath:element.modelKeyPath
@@ -172,7 +172,7 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
 - (BOOL)validate
 {
     if (!self.collectionView.window) return YES;
-
+    
     // validate and add any needed form error elements
     BOOL valid = YES;
     NSMutableArray *errorElementsToShow = [NSMutableArray new];
@@ -182,19 +182,19 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
             valid = NO;
             for (NSError *error in validationErrors) {
                 MYSFormMessageChildElement *errorFormElement = [MYSFormMessageChildElement messageElementWithMessage:[error localizedDescription]
-                                                                                                      type:MYSFormChildElementTypeValidationError
-                                                                                             parentElement:element];
+                                                                                                                type:MYSFormChildElementTypeValidationError
+                                                                                                       parentElement:element];
                 [errorElementsToShow addObject:errorFormElement];
             }
         }
     }
     self.outstandingValidationErrorCount = [errorElementsToShow count];
-
+    
     // remove all existing error elements
     [self hideChildrenOfElement:nil type:MYSFormChildElementTypeValidationError completion:^{
         [self showChildElements:errorElementsToShow position:MYSFormMessagePositionBelow duration:0 completion:nil];
     }];
-
+    
     return valid;
 }
 
@@ -253,8 +253,8 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
                 completion:(void (^)(void))completion
 {
     MYSFormMessageChildElement *successMessage = [MYSFormMessageChildElement messageElementWithMessage:message
-                                                                                        type:MYSFormChildElementTypeSuccess
-                                                                               parentElement:element];
+                                                                                                  type:MYSFormChildElementTypeSuccess
+                                                                                         parentElement:element];
     [self showChildElements:@[successMessage]
                    position:MYSFormMessagePositionBelow
                    duration:duration
@@ -297,7 +297,7 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
         [element updateCell];
         return cell;
     }
-
+    
     // have to do this because there's some bug I can't figure out that causes the last cell in a collection view to jump/stutter
     // when rows are inserted.
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"InvisibleCell" forIndexPath:indexPath];
@@ -351,12 +351,12 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
 {
     if ([self elementHasValidKeyPath:formElement]) {
         id value = [self.model valueForKeyPath:formElement.modelKeyPath];
-
+        
         // transform the value if needed
         if (formElement.valueTransformer && [[formElement.valueTransformer class] allowsReverseTransformation]) {
             value = [formElement.valueTransformer transformedValue:value];
         }
-
+        
         return value;
     }
     return nil;
@@ -373,7 +373,7 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
     if (formElement.valueTransformer && [[formElement.valueTransformer class] allowsReverseTransformation]) {
         value = [formElement.valueTransformer reverseTransformedValue:value];
     }
-
+    
     if ([self elementHasValidKeyPath:formElement]) {
         [self.model setValue:value forKeyPath:formElement.modelKeyPath];
         if ([self.formDelegate respondsToSelector:@selector(formViewController:didUpdateModelWithValue:element:)]) {
@@ -440,15 +440,15 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
                completion:(void (^)(void))completion
 {
     if (!self.collectionView.window) return;
-
+    
     for (MYSFormMessageChildElement *childElement in childElements) {
         if (!childElement.parentElement) {
             childElement.parentElement = (MYSFormElement *)[self.elements firstObject];
         }
     }
-
+    
     NSMutableArray *indexPathsToInsert  = [NSMutableArray new];
-
+    
     for (MYSFormElement *element in [self.elements copy]) {
         NSInteger indexOffset       = position == MYSFormMessagePositionBelow ? 1 : 0;
         NSInteger indexMultiplier   = position == MYSFormMessagePositionBelow ? 1 : -1;
@@ -456,11 +456,11 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
             if ([element isEqual:childElement.parentElement]) {
                 NSInteger index = [self.elements indexOfObject:childElement.parentElement];
                 NSAssert(index != NSNotFound, @"element must be added to the form.");
-
+                
                 NSInteger newIndex = index + (indexOffset++ * indexMultiplier);
                 [self addFormElement:childElement atIndex:newIndex];
                 [indexPathsToInsert addObject:[NSIndexPath indexPathForItem:newIndex inSection:0]];
-
+                
                 if (duration > 0) {
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(duration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                         [self hideChildrenOfElement:childElement.parentElement type:childElement.type completion:nil];
@@ -469,7 +469,7 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
             }
         }
     }
-
+    
     if ([indexPathsToInsert count] > 0) {
         [self.cachedCellSizes removeAllObjects];
         [self.collectionView performBatchUpdates:^{
@@ -483,17 +483,17 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
     else {
         if (completion) completion();
     }
-
+    
 }
 
 - (void)hideChildrenOfElement:(MYSFormElement *)parentElement type:(MYSFormChildElementType)type completion:(void (^)(void))completion
 {
     if (!self.collectionView.window) return;
-
+    
     NSArray *childElements = [self.elements filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(MYSFormElement *element, NSDictionary *bindings) {
         return ([element isKindOfClass:[MYSFormChildElement class]] && [(MYSFormChildElement *)element type] == type);
     }]];
-
+    
     NSMutableArray *indexPathsToRemove = [NSMutableArray new];
     for (MYSFormMessageChildElement *childElement in childElements) {
         if (!parentElement || [childElement.parentElement isEqual:parentElement]) {
@@ -502,14 +502,14 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
                 [self.elements removeObject:childElement];
                 [indexPathsToRemove addObject:ip];
             }
-
-//            NSInteger index = [self.elements indexOfObject:childElement];
-//            NSIndexPath *ip = [NSIndexPath indexPathForItem:index inSection:0];
-//            [self.elements removeObject:childElement];
-//            [indexPathsToRemove addObject:ip];
+            
+            //            NSInteger index = [self.elements indexOfObject:childElement];
+            //            NSIndexPath *ip = [NSIndexPath indexPathForItem:index inSection:0];
+            //            [self.elements removeObject:childElement];
+            //            [indexPathsToRemove addObject:ip];
         }
     }
-
+    
     if ([indexPathsToRemove count] > 0) {
         [self.cachedCellSizes removeAllObjects];
         [self.collectionView performBatchUpdates:^{
@@ -534,84 +534,69 @@ typedef NS_ENUM(NSUInteger, MYSFormMessagePosition) {
                                                       object:nil
                                                        queue:[NSOperationQueue mainQueue]
                                                   usingBlock:^(NSNotification *note)
-    {
-        CGRect endFrame             = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-        CGFloat animationDuration   = [note.userInfo[UIKeyboardAnimationDurationUserInfoKey] floatValue];
-        UIViewAnimationCurve curve  = [note.userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-        UIEdgeInsets insets         = self.collectionView.contentInset;
-        if (self.interfaceOrientation == UIInterfaceOrientationPortrait ||
-            self.interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) {
-            insets.bottom = endFrame.size.height;
-        }
-        else {
-            insets.bottom = endFrame.size.width;
-        }
-        [UIView animateWithDuration:animationDuration delay:0 options:(curve << 16) animations:^{
-            self.collectionView.contentInset = insets;
-        } completion:nil];
-    }];
-
+     {
+         if ([self.formDelegate respondsToSelector:@selector(formViewControllerWillShowKeyboard:)]) {
+             [self.formDelegate formViewControllerWillShowKeyboard:note];
+         }
+     }];
+    
     [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillHideNotification
                                                       object:nil
                                                        queue:[NSOperationQueue mainQueue]
                                                   usingBlock:^(NSNotification *note)
-    {
-        CGFloat animationDuration   = [note.userInfo[UIKeyboardAnimationDurationUserInfoKey] floatValue];
-        UIViewAnimationCurve curve  = [note.userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-        UIEdgeInsets insets         = self.collectionView.contentInset;
-        insets.bottom               = 0;
-        [UIView animateWithDuration:animationDuration delay:0 options:(curve << 16) animations:^{
-            self.collectionView.contentInset = insets;
-        } completion:nil];
-    }];
-
+     {
+         if ([self.formDelegate respondsToSelector:@selector(formViewControllerWillHideKeyboard:)]) {
+             [self.formDelegate formViewControllerWillHideKeyboard:note];
+         }
+     }];
+    
     [[NSNotificationCenter defaultCenter] addObserverForName:UITextFieldTextDidBeginEditingNotification
                                                       object:nil
                                                        queue:[NSOperationQueue mainQueue]
                                                   usingBlock:^(NSNotification *note)
-    {
-        UITextField *textField = note.object;
-        if ([[self visibleTextInputs] containsObject:textField]) {
-            if ([self textInputAfter:textField]) {
-                textField.returnKeyType = UIReturnKeyNext;
-            }
-            else {
-                textField.returnKeyType = UIReturnKeyDone;
-            }
-        }
-    }];
-
+     {
+         UITextField *textField = note.object;
+         if ([[self visibleTextInputs] containsObject:textField]) {
+             if ([self textInputAfter:textField]) {
+                 textField.returnKeyType = UIReturnKeyNext;
+             }
+             else {
+                 textField.returnKeyType = UIReturnKeyDone;
+             }
+         }
+     }];
+    
     [[NSNotificationCenter defaultCenter] addObserverForName:UITextFieldTextDidEndEditingNotification
                                                       object:nil
                                                        queue:[NSOperationQueue mainQueue]
                                                   usingBlock:^(NSNotification *note)
-    {
-        UITextField *textField = note.object;
-        if ([[self visibleTextInputs] containsObject:textField]) {
-            if (self.outstandingValidationErrorCount > 0) {
-                [self validate];
-            }
-        }
-    }];
-
+     {
+         UITextField *textField = note.object;
+         if ([[self visibleTextInputs] containsObject:textField]) {
+             if (self.outstandingValidationErrorCount > 0) {
+                 [self validate];
+             }
+         }
+     }];
+    
     [[NSNotificationCenter defaultCenter] addObserverForName:MYSFormTextFieldCellDidHitReturnKey
                                                       object:nil
                                                        queue:[NSOperationQueue mainQueue]
                                                   usingBlock:^(NSNotification *note)
-    {
-        UITextField *textField = note.object;
-        if ([[self visibleTextInputs] containsObject:textField]) {
-            UIView *nextTextInput = [self textInputAfter:textField];
-            if (nextTextInput) {
-                [nextTextInput becomeFirstResponder];
-            }
-            else {
-                if ([self.formDelegate respondsToSelector:@selector(formViewControllerDidSubmit:)]) {
-                    [self.formDelegate formViewControllerDidSubmit:self];
-                }
-            }
-        }
-    }];
+     {
+         UITextField *textField = note.object;
+         if ([[self visibleTextInputs] containsObject:textField]) {
+             UIView *nextTextInput = [self textInputAfter:textField];
+             if (nextTextInput) {
+                 [nextTextInput becomeFirstResponder];
+             }
+             else {
+                 if ([self.formDelegate respondsToSelector:@selector(formViewControllerDidSubmit:)]) {
+                     [self.formDelegate formViewControllerDidSubmit:self];
+                 }
+             }
+         }
+     }];
 }
 
 
