@@ -10,14 +10,13 @@ Pod::Spec.new do |s|
                    * Try to keep it short, snappy and to the point.
                    * Finally, don't worry about the indent, CocoaPods strips it!
                    DESC
-  s.homepage     = "https://github.com/mysterioustrousers/MYSForms"
+  s.homepage     = "https://github.com/dmitrykurochka/MYSForms"
   s.license      = "MIT"
   s.author             = { "Adam Kirk" => "atomkirk@gmail.com" }
   s.social_media_url   = "http://twitter.com/atomkirk"
   s.platform     = :ios, "7.0"
   s.source       =  {
                       :git => "https://github.com/dmitrykurochka/MYSForms.git",
-                      :tag => "#{s.version}",
                       :submodules => true
                     }
   s.source_files  = "MYSForms/MYSForms/**/*.{h,m}", "libs/MYSCollectionView/**/*.{h,m}"
